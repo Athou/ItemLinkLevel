@@ -18,7 +18,11 @@ function filter(self, event, message, user, ...)
 				-- don't display Cloth for cloaks
 				elseif (itemClassId == 4 and itemSubClassId == 1) then
 				else
-					table.insert(attrs, itemSubType) 
+					if (SavedData.subtype_short_format) then 
+						table.insert(attrs, itemSubType:sub(0, 1)) 
+					else 
+						table.insert(attrs, itemSubType) 
+					end
 				end
 			end
 			if (SavedData.show_equiploc and itemEquipLoc ~= nil and _G[itemEquipLoc] ~= nil) then table.insert(attrs, _G[itemEquipLoc]) end
@@ -43,6 +47,7 @@ local function eventHandler(self, event, ...)
 	if (SavedData.trigger_loots == nil) then SavedData.trigger_loots = true end
 	if (SavedData.trigger_chat == nil) then SavedData.trigger_chat = true end
 	if (SavedData.show_subtype == nil) then SavedData.show_subtype = true end
+	if (SavedData.subtype_short_format == nil) then SavedData.subtype_short_format = false end
 	if (SavedData.show_equiploc == nil) then SavedData.show_equiploc = true end
 	if (SavedData.show_ilevel == nil) then SavedData.show_ilevel = true end
 
@@ -78,27 +83,33 @@ local function eventHandler(self, event, ...)
 	subtypeCheckBox:SetChecked(SavedData.show_subtype)
 	_G[subtypeCheckBox:GetName().."Text"]:SetText("Display armor/weapon type (Plate, Leather, ...)")
 	subtypeCheckBox:SetScript("OnClick", function(self) SavedData.show_subtype = self:GetChecked() end)
+	
+	local subtypeShortCheckBox = CreateFrame("CheckButton", "subtypeShortCheckBox", panel, "UICheckButtonTemplate")
+	subtypeShortCheckBox:SetPoint("TOPLEFT",30, -60)
+	subtypeShortCheckBox:SetChecked(SavedData.subtype_short_format)
+	_G[subtypeShortCheckBox:GetName().."Text"]:SetText("Short format (P for plate, L for leather, ...)")
+	subtypeShortCheckBox:SetScript("OnClick", function(self) SavedData.subtype_short_format = self:GetChecked() end)
 
 	local equipLocCheckbox = CreateFrame("CheckButton", "equipLocCheckbox", panel, "UICheckButtonTemplate")
-	equipLocCheckbox:SetPoint("TOPLEFT",10, -60)
+	equipLocCheckbox:SetPoint("TOPLEFT",10, -90)
 	equipLocCheckbox:SetChecked(SavedData.show_equiploc)
 	_G[equipLocCheckbox:GetName().."Text"]:SetText("Display equip location (Head, Trinket, ...)")
 	equipLocCheckbox:SetScript("OnClick", function(self) SavedData.show_equiploc = self:GetChecked() end)
 
 	local iLevelCheckbox = CreateFrame("CheckButton", "iLevelCheckbox", panel, "UICheckButtonTemplate")
-	iLevelCheckbox:SetPoint("TOPLEFT",10, -90)
+	iLevelCheckbox:SetPoint("TOPLEFT",10, -120)
 	iLevelCheckbox:SetChecked(SavedData.show_ilevel)
 	_G[iLevelCheckbox:GetName().."Text"]:SetText("Display item level")
 	iLevelCheckbox:SetScript("OnClick", function(self) SavedData.show_ilevel = self:GetChecked() end)
 	
 	local triggerLootsCheckbox = CreateFrame("CheckButton", "triggerLootsCheckbox", panel, "UICheckButtonTemplate")
-	triggerLootsCheckbox:SetPoint("TOPLEFT",10, -150)
+	triggerLootsCheckbox:SetPoint("TOPLEFT",10, -180)
 	triggerLootsCheckbox:SetChecked(SavedData.trigger_loots)
 	_G[triggerLootsCheckbox:GetName().."Text"]:SetText("Trigger on loots (requires restart)")
 	triggerLootsCheckbox:SetScript("OnClick", function(self) SavedData.trigger_loots = self:GetChecked() end)
 	
 	local triggerChatCheckbox = CreateFrame("CheckButton", "triggerChatCheckbox", panel, "UICheckButtonTemplate")
-	triggerChatCheckbox:SetPoint("TOPLEFT",10, -180)
+	triggerChatCheckbox:SetPoint("TOPLEFT",10, -210)
 	triggerChatCheckbox:SetChecked(SavedData.trigger_chat)
 	_G[triggerChatCheckbox:GetName().."Text"]:SetText("Trigger on chat messages (requires restart)")
 	triggerChatCheckbox:SetScript("OnClick", function(self) SavedData.trigger_chat = self:GetChecked() end)
