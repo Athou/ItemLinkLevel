@@ -4,12 +4,23 @@ frame:RegisterEvent("PLAYER_LOGIN");
 function filter(self, event, message, user, ...)
 	for itemLink in message:gmatch("|%x+|Hitem:.-|h.-|h|r") do
 		local itemName, _, _, iLevel, _, itemType, itemSubType, _, itemEquipLoc, _, _, itemClassId, itemSubClassId = GetItemInfo(itemLink)
+		-- 2 = weapon
+		-- 3 = artefact relic
+		-- 4 = armor
 		if (itemClassId == 2 or itemClassId == 3 or itemClassId == 4) then
 			local itemString = string.match(itemLink, "item[%-?%d:]+")
 			local _, _, Color, Ltype, Id, Enchant, Gem1, Gem2, Gem3, Gem4, Suffix, Unique, LinkLvl, Name = string.find(itemLink, "|?c?f?f?(%x*)|?H?([^:]*):?(%d+):?(%d*):?(%d*):?(%d*):?(%d*):?(%d*):?(%-?%d*):?(%-?%d*):?(%d*):?(%d*):?(%-?%d*)|?h?%[?([^%[%]]*)%]?|?h?|?r?")
 			
 			local attrs = {}
-			if (SavedData.show_subtype and itemSubType ~= nil) then table.insert(attrs, itemSubType) end
+			if (SavedData.show_subtype and itemSubType ~= nil) then
+				-- don't display Miscellaneous for rings, necks and trinkets
+				if (itemClassId == 4 and itemSubClassId == 0) then
+				-- don't display Cloth for cloaks
+				elseif (itemClassId == 4 and itemSubClassId == 1) then
+				else
+					table.insert(attrs, itemSubType) 
+				end
+			end
 			if (SavedData.show_equiploc and itemEquipLoc ~= nil and _G[itemEquipLoc] ~= nil) then table.insert(attrs, _G[itemEquipLoc]) end
 			if (SavedData.show_ilevel and iLevel ~= nil) then table.insert(attrs, iLevel) end
 			
