@@ -9,7 +9,7 @@ function filter(self, event, message, user, ...)
 		-- 4 = armor
 		if (itemClassId == 2 or itemClassId == 3 or itemClassId == 4) then
 			local itemString = string.match(itemLink, "item[%-?%d:]+")
-			local _, _, Color, Ltype, Id, Enchant, Gem1, Gem2, Gem3, Gem4, Suffix, Unique, LinkLvl, Name = string.find(itemLink, "|?c?f?f?(%x*)|?H?([^:]*):?(%d+):?(%d*):?(%d*):?(%d*):?(%d*):?(%d*):?(%-?%d*):?(%-?%d*):?(%d*):?(%d*):?(%-?%d*)|?h?%[?([^%[%]]*)%]?|?h?|?r?")
+			local _, _, color = string.find(itemLink, "|?c?f?f?(%x*)|?H?([^:]*):?(%d+):?(%d*):?(%d*):?(%d*):?(%d*):?(%d*):?(%-?%d*):?(%-?%d*):?(%d*):?(%d*):?(%-?%d*)|?h?%[?([^%[%]]*)%]?|?h?|?r?")
 			
 			local attrs = {}
 			if (SavedData.show_subtype and itemSubType ~= nil) then
@@ -25,7 +25,7 @@ function filter(self, event, message, user, ...)
 			if (SavedData.show_ilevel and iLevel ~= nil) then table.insert(attrs, iLevel) end
 			
 			local newItemName = itemName.." ("..table.concat(attrs, " ")..")"
-			local newLink = "|cff"..Color.."|H"..itemString.."|h["..newItemName.."]|h|r"
+			local newLink = "|cff"..color.."|H"..itemString.."|h["..newItemName.."]|h|r"
 			
 			message = string.gsub(message, escapeSearchString(itemLink), newLink)
 		end
