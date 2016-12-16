@@ -39,32 +39,37 @@ function escapeSearchString(str)
 end
 
 local function eventHandler(self, event, ...)
-	ChatFrame_AddMessageEventFilter("CHAT_MSG_BATTLEGROUND", filter);
-	ChatFrame_AddMessageEventFilter("CHAT_MSG_BATTLEGROUND_LEADER", filter);
-	ChatFrame_AddMessageEventFilter("CHAT_MSG_CHANNEL", filter);
-	ChatFrame_AddMessageEventFilter("CHAT_MSG_EMOTE", filter);
-	ChatFrame_AddMessageEventFilter("CHAT_MSG_GUILD", filter);
-	ChatFrame_AddMessageEventFilter("CHAT_MSG_INSTANCE_CHAT", filter);
-	ChatFrame_AddMessageEventFilter("CHAT_MSG_INSTANCE_CHAT_LEADER", filter);
-	ChatFrame_AddMessageEventFilter("CHAT_MSG_LOOT", filter);
-	ChatFrame_AddMessageEventFilter("CHAT_MSG_OFFICER", filter);
-	ChatFrame_AddMessageEventFilter("CHAT_MSG_PARTY", filter);
-	ChatFrame_AddMessageEventFilter("CHAT_MSG_PARTY_LEADER", filter);
-	ChatFrame_AddMessageEventFilter("CHAT_MSG_RAID", filter);
-	ChatFrame_AddMessageEventFilter("CHAT_MSG_RAID_LEADER", filter);
-	ChatFrame_AddMessageEventFilter("CHAT_MSG_RAID_WARNING", filter);
-	ChatFrame_AddMessageEventFilter("CHAT_MSG_SAY", filter);
-	ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER", filter);
-	ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER_INFORM", filter)
-	ChatFrame_AddMessageEventFilter("CHAT_MSG_YELL", filter);
-	
-	if (SavedData == nil) then 
-		SavedData = {}
-		SavedData.show_subtype = true
-		SavedData.show_equiploc = true
-		SavedData.show_ilevel = true
+	if (SavedData == nil) then SavedData = {} end
+	if (SavedData.trigger_loots == nil) then SavedData.trigger_loots = true end
+	if (SavedData.trigger_chat == nil) then SavedData.trigger_chat = true end
+	if (SavedData.show_subtype == nil) then SavedData.show_subtype = true end
+	if (SavedData.show_equiploc == nil) then SavedData.show_equiploc = true end
+	if (SavedData.show_ilevel == nil) then SavedData.show_ilevel = true end
+
+	if (SavedData.trigger_loots) then
+		ChatFrame_AddMessageEventFilter("CHAT_MSG_LOOT", filter);
 	end
-	
+
+	if (SavedData.trigger_chat) then
+		ChatFrame_AddMessageEventFilter("CHAT_MSG_BATTLEGROUND", filter);
+		ChatFrame_AddMessageEventFilter("CHAT_MSG_BATTLEGROUND_LEADER", filter);
+		ChatFrame_AddMessageEventFilter("CHAT_MSG_CHANNEL", filter);
+		ChatFrame_AddMessageEventFilter("CHAT_MSG_EMOTE", filter);
+		ChatFrame_AddMessageEventFilter("CHAT_MSG_GUILD", filter);
+		ChatFrame_AddMessageEventFilter("CHAT_MSG_INSTANCE_CHAT", filter);
+		ChatFrame_AddMessageEventFilter("CHAT_MSG_INSTANCE_CHAT_LEADER", filter);
+		ChatFrame_AddMessageEventFilter("CHAT_MSG_OFFICER", filter);
+		ChatFrame_AddMessageEventFilter("CHAT_MSG_PARTY", filter);
+		ChatFrame_AddMessageEventFilter("CHAT_MSG_PARTY_LEADER", filter);
+		ChatFrame_AddMessageEventFilter("CHAT_MSG_RAID", filter);
+		ChatFrame_AddMessageEventFilter("CHAT_MSG_RAID_LEADER", filter);
+		ChatFrame_AddMessageEventFilter("CHAT_MSG_RAID_WARNING", filter);
+		ChatFrame_AddMessageEventFilter("CHAT_MSG_SAY", filter);
+		ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER", filter);
+		ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER_INFORM", filter)
+		ChatFrame_AddMessageEventFilter("CHAT_MSG_YELL", filter);
+	end
+		
 	local panel = CreateFrame("Frame", "OptionsPanel", UIParent)
 	panel.name = "ItemLinkLevel"
 
@@ -85,6 +90,18 @@ local function eventHandler(self, event, ...)
 	iLevelCheckbox:SetChecked(SavedData.show_ilevel)
 	_G[iLevelCheckbox:GetName().."Text"]:SetText("Display item level")
 	iLevelCheckbox:SetScript("OnClick", function(self) SavedData.show_ilevel = self:GetChecked() end)
+	
+	local triggerLootsCheckbox = CreateFrame("CheckButton", "triggerLootsCheckbox", panel, "UICheckButtonTemplate")
+	triggerLootsCheckbox:SetPoint("TOPLEFT",10, -150)
+	triggerLootsCheckbox:SetChecked(SavedData.trigger_loots)
+	_G[triggerLootsCheckbox:GetName().."Text"]:SetText("Trigger on loots (requires restart)")
+	triggerLootsCheckbox:SetScript("OnClick", function(self) SavedData.trigger_loots = self:GetChecked() end)
+	
+	local triggerChatCheckbox = CreateFrame("CheckButton", "triggerChatCheckbox", panel, "UICheckButtonTemplate")
+	triggerChatCheckbox:SetPoint("TOPLEFT",10, -180)
+	triggerChatCheckbox:SetChecked(SavedData.trigger_chat)
+	_G[triggerChatCheckbox:GetName().."Text"]:SetText("Trigger on chat messages (requires restart)")
+	triggerChatCheckbox:SetScript("OnClick", function(self) SavedData.trigger_chat = self:GetChecked() end)
 
 	InterfaceOptions_AddCategory(panel)
 end
