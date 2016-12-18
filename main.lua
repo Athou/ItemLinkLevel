@@ -1,20 +1,19 @@
+local PLH_RELIC_TOOLTIP_TYPE_PATTERN = _G.RELIC_TOOLTIP_TYPE:gsub('%%s', '(.+)')
+
 local frame = CreateFrame("Frame", "ItemLinkLevel");
 frame:RegisterEvent("PLAYER_LOGIN");
 
 function filter(self, event, message, user, ...)
 	for itemLink in message:gmatch("|%x+|Hitem:.-|h.-|h|r") do
 		local itemName, _, _, iLevel, _, itemType, itemSubType, _, itemEquipLoc, _, _, itemClassId, itemSubClassId = GetItemInfo(itemLink)
-		-- 2 = weapon
-		-- 3 = artefact relic
-		-- 4 = armor
-		if (itemClassId == 2 or itemClassId == 3 or itemClassId == 4) then
+		if (itemClassId == LE_ITEM_CLASS_WEAPON or itemClassId == LE_ITEM_CLASS_GEM or itemClassId == LE_ITEM_CLASS_ARMOR) then
 			local itemString = string.match(itemLink, "item[%-?%d:]+")
 			local _, _, color = string.find(itemLink, "|?c?f?f?(%x*)|?H?([^:]*):?(%d+):?(%d*):?(%d*):?(%d*):?(%d*):?(%d*):?(%-?%d*):?(%-?%d*):?(%d*):?(%d*):?(%-?%d*)|?h?%[?([^%[%]]*)%]?|?h?|?r?")
 			
 			local attrs = {}
 			if (SavedData.show_subtype and itemSubType ~= nil) then
 				-- don't display Miscellaneous for rings, necks and trinkets
-				if (itemClassId == 4 and itemSubClassId == 0) then
+				if (itemClassId == LE_ITEM_CLASS_ARMOR and itemSubClassId == 0) then
 				-- don't display Cloth for cloaks
 				elseif (itemClassId == LE_ITEM_CLASS_ARMOR and itemEquipLoc == itemEquipLoc) then
 				else
@@ -23,6 +22,10 @@ function filter(self, event, message, user, ...)
 					else 
 						table.insert(attrs, itemSubType) 
 					end
+				end
+				if (itemClassId == LE_ITEM_CLASS_GEM and itemSubClassId == LE_ITEM_ARMOR_RELIC) then 
+					local relicType = PLH_GetRelicType(itemLink)
+					table.insert(attrs, relicType)
 				end
 			end
 			if (SavedData.show_equiploc and itemEquipLoc ~= nil and _G[itemEquipLoc] ~= nil) then table.insert(attrs, _G[itemEquipLoc]) end
@@ -40,6 +43,33 @@ end
 -- Inhibit Regular Expression magic characters ^$()%.[]*+-?)
 function escapeSearchString(str)
 	return str:gsub("(%W)","%%%1")
+end
+
+-- function borrowed from PersonalLootHelper
+function PLH_GetRelicType(item)
+	local relicType = nil
+	
+	if item ~= nil then
+		tooltip = tooltip or CreateEmptyTooltip()
+		tooltip:SetOwner(UIParent, 'ANCHOR_NONE')
+		tooltip:ClearLines()
+		tooltip:SetHyperlink(item)
+		local t = tooltip.leftside[2]:GetText()
+
+		local index = 1
+		local t
+		while not relicType and tooltip.leftside[index] do
+			t = tooltip.leftside[index]:GetText()
+			if t ~= nil then
+				relicType = t:match(PLH_RELIC_TOOLTIP_TYPE_PATTERN)				
+			end
+			index = index + 1
+		end
+
+		tooltip:Hide()
+	end
+	
+	return relicType
 end
 
 local function eventHandler(self, event, ...)
