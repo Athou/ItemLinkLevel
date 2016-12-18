@@ -1,11 +1,13 @@
 local PLH_RELIC_TOOLTIP_TYPE_PATTERN = _G.RELIC_TOOLTIP_TYPE:gsub('%%s', '(.+)')
+local PLH_ITEM_LEVEL_PATTERN = _G.ITEM_LEVEL:gsub('%%d', '(%%d+)')
 
 local frame = CreateFrame("Frame", "ItemLinkLevel");
 frame:RegisterEvent("PLAYER_LOGIN");
 
 function filter(self, event, message, user, ...)
 	for itemLink in message:gmatch("|%x+|Hitem:.-|h.-|h|r") do
-		local itemName, _, _, iLevel, _, itemType, itemSubType, _, itemEquipLoc, _, _, itemClassId, itemSubClassId = GetItemInfo(itemLink)
+		local itemName, _, _, _, _, itemType, itemSubType, _, itemEquipLoc, _, _, itemClassId, itemSubClassId = GetItemInfo(itemLink)
+		local iLevel = PLH_GetRealILVL(itemLink)
 		if (itemClassId == LE_ITEM_CLASS_WEAPON or itemClassId == LE_ITEM_CLASS_GEM or itemClassId == LE_ITEM_CLASS_ARMOR) then
 			local itemString = string.match(itemLink, "item[%-?%d:]+")
 			local _, _, color = string.find(itemLink, "|?c?f?f?(%x*)|?H?([^:]*):?(%d+):?(%d*):?(%d*):?(%d*):?(%d*):?(%d*):?(%-?%d*):?(%-?%d*):?(%d*):?(%d*):?(%-?%d*)|?h?%[?([^%[%]]*)%]?|?h?|?r?")
@@ -70,6 +72,44 @@ function PLH_GetRelicType(item)
 	end
 	
 	return relicType
+end
+
+-- function borrowed from PersonalLootHelper
+function PLH_GetRealILVL(item)
+	local realILVL = nil
+	
+	if item ~= nil then
+		tooltip = tooltip or CreateEmptyTooltip()
+		tooltip:SetOwner(UIParent, 'ANCHOR_NONE')
+		tooltip:ClearLines()
+		tooltip:SetHyperlink(item)
+		local t = tooltip.leftside[2]:GetText()
+		if t ~= nil then
+--			realILVL = t:match('Item Level (%d+)')
+			realILVL = t:match(PLH_ITEM_LEVEL_PATTERN)
+		end
+		-- ilvl can be in the 2nd or 3rd line dependng on the tooltip; if we didn't find it in 2nd, try 3rd
+		if realILVL == nil then
+			t = tooltip.leftside[3]:GetText()
+			if t ~= nil then
+--				realILVL = t:match('Item Level (%d+)')
+				realILVL = t:match(PLH_ITEM_LEVEL_PATTERN)
+			end
+		end
+		tooltip:Hide()
+		
+		-- if realILVL is still nil, we couldn't find it in the tooltip - try grabbing it from getItemInfo, even though
+		--   that doesn't return upgrade levels
+		if realILVL == nil then
+			_, _, _, realILVL, _, _, _, _, _, _, _ = GetItemInfo(item)
+		end
+	end
+	
+	if realILVL == nil then
+		return 0
+	else		
+		return tonumber(realILVL)
+	end
 end
 
 local function eventHandler(self, event, ...)
