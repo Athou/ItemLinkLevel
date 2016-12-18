@@ -12,10 +12,10 @@ function filter(self, event, message, user, ...)
 			
 			local attrs = {}
 			if (SavedData.show_subtype and itemSubType ~= nil) then
-				-- don't display Miscellaneous for rings, necks and trinkets
 				if (itemClassId == LE_ITEM_CLASS_ARMOR and itemSubClassId == 0) then
+				-- don't display Miscellaneous for rings, necks and trinkets
+				elseif (itemClassId == LE_ITEM_CLASS_ARMOR and itemEquipLoc == "INVTYPE_CLOAK") then
 				-- don't display Cloth for cloaks
-				elseif (itemClassId == LE_ITEM_CLASS_ARMOR and itemEquipLoc == itemEquipLoc) then
 				else
 					if (SavedData.subtype_short_format) then 
 						table.insert(attrs, itemSubType:sub(0, 1)) 
