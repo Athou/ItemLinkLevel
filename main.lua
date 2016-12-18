@@ -3,6 +3,7 @@ local PLH_ITEM_LEVEL_PATTERN = _G.ITEM_LEVEL:gsub('%%d', '(%%d+)')
 
 local frame = CreateFrame("Frame", "ItemLinkLevel");
 frame:RegisterEvent("PLAYER_LOGIN");
+local tooltip
 
 function filter(self, event, message, user, ...)
 	for itemLink in message:gmatch("|%x+|Hitem:.-|h.-|h|r") do
@@ -45,6 +46,25 @@ end
 -- Inhibit Regular Expression magic characters ^$()%.[]*+-?)
 function escapeSearchString(str)
 	return str:gsub("(%W)","%%%1")
+end
+
+-- function borrowed from PersonalLootHelper
+local function CreateEmptyTooltip()
+    local tip = CreateFrame('GameTooltip')
+	local leftside = {}
+	local rightside = {}
+	local L, R
+    for i = 1, 6 do
+        L, R = tip:CreateFontString(), tip:CreateFontString()
+        L:SetFontObject(GameFontNormal)
+        R:SetFontObject(GameFontNormal)
+        tip:AddFontStrings(L, R)
+        leftside[i] = L
+		rightside[i] = R
+    end
+    tip.leftside = leftside
+	tip.rightside = rightside
+    return tip
 end
 
 -- function borrowed from PersonalLootHelper
