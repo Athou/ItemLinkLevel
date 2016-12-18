@@ -16,7 +16,7 @@ function filter(self, event, message, user, ...)
 				-- don't display Miscellaneous for rings, necks and trinkets
 				if (itemClassId == 4 and itemSubClassId == 0) then
 				-- don't display Cloth for cloaks
-				elseif (itemClassId == 4 and itemSubClassId == 1) then
+				elseif (itemClassId == LE_ITEM_CLASS_ARMOR and itemEquipLoc == itemEquipLoc) then
 				else
 					if (SavedData.subtype_short_format) then 
 						table.insert(attrs, itemSubType:sub(0, 1)) 
