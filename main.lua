@@ -205,24 +205,25 @@ local function eventHandler(self, event, ...)
 	_G[triggerChatCheckbox:GetName().."Text"]:SetText("Trigger on chat messages (requires restart)")
 	triggerChatCheckbox:SetScript("OnClick", function(self) SavedData.trigger_chat = self:GetChecked() end)
 	
-	local triggerQualityLabel = panel:CreateFontString("triggerQualityLabel", nil, "GameFontNormal")
+	local triggerQualityLabel = panel:CreateFontString("triggerQualityLabel", panel, "GameFontNormal")
     triggerQualityLabel:SetText("Minimum trigger quality")
     triggerQualityLabel:SetPoint("TOPLEFT",10,-260)
-	local triggerQualityDropdown = CreateFrame("Button", "triggerQualityDropdown", panel, "UIDropDownMenuTemplate")
-	triggerQualityDropdown:SetPoint("LEFT", triggerQualityLabel, "RIGHT", 0, 0)
-	UIDropDownMenu_Initialize(triggerQualityDropdown, function(self, level)
-		for i=0,7 do
-			local info = {}
-			info.text = _G["ITEM_QUALITY"..i.."_DESC"]
-			info.value = i
-			info.func = function() 
-				SavedData.trigger_quality = i
-				UIDropDownMenu_SetSelectedID(triggerQualityDropdown, i+1)
-			end
-			UIDropDownMenu_AddButton(info)
-		end
+	local triggerQualityValue = panel:CreateFontString("triggerQualityValue", panel, "GameFontNormal")
+	local triggerQualitySlider = CreateFrame("Slider", "MySliderGlobalName", panel, "OptionsSliderTemplate")
+	triggerQualitySlider:SetPoint("LEFT", triggerQualityLabel, "RIGHT", 10, 0)
+	triggerQualitySlider:SetMinMaxValues(0, 6)
+	triggerQualitySlider:SetValue(SavedData.trigger_quality)
+	triggerQualitySlider:SetValueStep(1)
+	getglobal(triggerQualitySlider:GetName() .. 'Low'):SetText(_G["ITEM_QUALITY0_DESC"])
+	getglobal(triggerQualitySlider:GetName() .. 'High'):SetText(_G["ITEM_QUALITY6_DESC"])
+	triggerQualitySlider:SetScript("OnValueChanged", function(self, value) 
+		value = math.floor(value)
+		SavedData.trigger_quality = value 
+	    triggerQualityValue:SetText(_G["ITEM_QUALITY"..value.."_DESC"])
 	end)
-	UIDropDownMenu_SetSelectedID(triggerQualityDropdown, SavedData.trigger_quality+1)
+	
+    triggerQualityValue:SetText(_G["ITEM_QUALITY"..SavedData.trigger_quality.."_DESC"])
+    triggerQualityValue:SetPoint("LEFT", triggerQualitySlider, "RIGHT", 10, 0)
 
 	InterfaceOptions_AddCategory(panel)
 end
