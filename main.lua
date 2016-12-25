@@ -7,8 +7,8 @@ local tooltip
 
 function filter(self, event, message, user, ...)
 	for itemLink in message:gmatch("|%x+|Hitem:.-|h.-|h|r") do
-		local itemName, _, _, _, _, itemType, itemSubType, _, itemEquipLoc, _, _, itemClassId, itemSubClassId = GetItemInfo(itemLink)
-		if (itemClassId == LE_ITEM_CLASS_WEAPON or itemClassId == LE_ITEM_CLASS_GEM or itemClassId == LE_ITEM_CLASS_ARMOR) then
+		local itemName, _, quality, _, _, itemType, itemSubType, _, itemEquipLoc, _, _, itemClassId, itemSubClassId = GetItemInfo(itemLink)
+		if (quality >= SavedData.trigger_quality and (itemClassId == LE_ITEM_CLASS_WEAPON or itemClassId == LE_ITEM_CLASS_GEM or itemClassId == LE_ITEM_CLASS_ARMOR)) then
 			local itemString = string.match(itemLink, "item[%-?%d:]+")
 			local _, _, color = string.find(itemLink, "|?c?f?f?(%x*)|?H?([^:]*):?(%d+):?(%d*):?(%d*):?(%d*):?(%d*):?(%d*):?(%-?%d*):?(%-?%d*):?(%d*):?(%d*):?(%-?%d*)|?h?%[?([^%[%]]*)%]?|?h?|?r?")
 			local iLevel = PLH_GetRealILVL(itemLink)
@@ -136,6 +136,7 @@ local function eventHandler(self, event, ...)
 	if (SavedData == nil) then SavedData = {} end
 	if (SavedData.trigger_loots == nil) then SavedData.trigger_loots = true end
 	if (SavedData.trigger_chat == nil) then SavedData.trigger_chat = true end
+	if (SavedData.trigger_quality == nil) then SavedData.trigger_quality = 3 end
 	if (SavedData.show_subtype == nil) then SavedData.show_subtype = true end
 	if (SavedData.subtype_short_format == nil) then SavedData.subtype_short_format = false end
 	if (SavedData.show_equiploc == nil) then SavedData.show_equiploc = true end
@@ -203,6 +204,25 @@ local function eventHandler(self, event, ...)
 	triggerChatCheckbox:SetChecked(SavedData.trigger_chat)
 	_G[triggerChatCheckbox:GetName().."Text"]:SetText("Trigger on chat messages (requires restart)")
 	triggerChatCheckbox:SetScript("OnClick", function(self) SavedData.trigger_chat = self:GetChecked() end)
+	
+	local triggerQualityLabel = panel:CreateFontString("triggerQualityLabel", nil, "GameFontNormal")
+    triggerQualityLabel:SetText("Minimum trigger quality")
+    triggerQualityLabel:SetPoint("TOPLEFT",10,-260)
+	local triggerQualityDropdown = CreateFrame("Button", "triggerQualityDropdown", panel, "UIDropDownMenuTemplate")
+	triggerQualityDropdown:SetPoint("LEFT", triggerQualityLabel, "RIGHT", 0, 0)
+	UIDropDownMenu_Initialize(triggerQualityDropdown, function(self, level)
+		for i=0,7 do
+			local info = {}
+			info.text = _G["ITEM_QUALITY"..i.."_DESC"]
+			info.value = i
+			info.func = function() 
+				SavedData.trigger_quality = i
+				UIDropDownMenu_SetSelectedID(triggerQualityDropdown, i+1)
+			end
+			UIDropDownMenu_AddButton(info)
+		end
+	end)
+	UIDropDownMenu_SetSelectedID(triggerQualityDropdown, SavedData.trigger_quality+1)
 
 	InterfaceOptions_AddCategory(panel)
 end
