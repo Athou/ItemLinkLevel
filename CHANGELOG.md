@@ -1,3 +1,6 @@
+## 1.5.1
+fix issue when quality is nil
+
 ## 1.5##
 option to choose the minimum level quality (uncommon, rare, ...) required for the addon to trigger, default id rare
 
