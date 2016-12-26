@@ -8,7 +8,7 @@ local tooltip
 function filter(self, event, message, user, ...)
 	for itemLink in message:gmatch("|%x+|Hitem:.-|h.-|h|r") do
 		local itemName, _, quality, _, _, itemType, itemSubType, _, itemEquipLoc, _, _, itemClassId, itemSubClassId = GetItemInfo(itemLink)
-		if (quality >= SavedData.trigger_quality and (itemClassId == LE_ITEM_CLASS_WEAPON or itemClassId == LE_ITEM_CLASS_GEM or itemClassId == LE_ITEM_CLASS_ARMOR)) then
+		if (quality ~= nil and quality >= SavedData.trigger_quality and (itemClassId == LE_ITEM_CLASS_WEAPON or itemClassId == LE_ITEM_CLASS_GEM or itemClassId == LE_ITEM_CLASS_ARMOR)) then
 			local itemString = string.match(itemLink, "item[%-?%d:]+")
 			local _, _, color = string.find(itemLink, "|?c?f?f?(%x*)|?H?([^:]*):?(%d+):?(%d*):?(%d*):?(%d*):?(%d*):?(%d*):?(%-?%d*):?(%-?%d*):?(%d*):?(%d*):?(%-?%d*)|?h?%[?([^%[%]]*)%]?|?h?|?r?")
 			local iLevel = PLH_GetRealILVL(itemLink)
@@ -206,8 +206,8 @@ local function eventHandler(self, event, ...)
 	triggerChatCheckbox:SetScript("OnClick", function(self) SavedData.trigger_chat = self:GetChecked() end)
 	
 	local triggerQualityLabel = panel:CreateFontString("triggerQualityLabel", panel, "GameFontNormal")
-    triggerQualityLabel:SetText("Minimum trigger quality")
-    triggerQualityLabel:SetPoint("TOPLEFT",10,-260)
+	triggerQualityLabel:SetText("Minimum trigger quality")
+	triggerQualityLabel:SetPoint("TOPLEFT",10,-260)
 	local triggerQualityValue = panel:CreateFontString("triggerQualityValue", panel, "GameFontNormal")
 	local triggerQualitySlider = CreateFrame("Slider", "MySliderGlobalName", panel, "OptionsSliderTemplate")
 	triggerQualitySlider:SetPoint("LEFT", triggerQualityLabel, "RIGHT", 10, 0)
@@ -222,8 +222,8 @@ local function eventHandler(self, event, ...)
 	    triggerQualityValue:SetText(_G["ITEM_QUALITY"..value.."_DESC"])
 	end)
 	
-    triggerQualityValue:SetText(_G["ITEM_QUALITY"..SavedData.trigger_quality.."_DESC"])
-    triggerQualityValue:SetPoint("LEFT", triggerQualitySlider, "RIGHT", 10, 0)
+	triggerQualityValue:SetText(_G["ITEM_QUALITY"..SavedData.trigger_quality.."_DESC"])
+	triggerQualityValue:SetPoint("LEFT", triggerQualitySlider, "RIGHT", 10, 0)
 
 	InterfaceOptions_AddCategory(panel)
 end
