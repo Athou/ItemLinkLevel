@@ -32,7 +32,11 @@ function filter(self, event, message, user, ...)
 				end
 			end
 			if (SavedData.show_equiploc and itemEquipLoc ~= nil and _G[itemEquipLoc] ~= nil) then table.insert(attrs, _G[itemEquipLoc]) end
-			if (SavedData.show_ilevel and iLevel ~= nil) then table.insert(attrs, iLevel) end
+			if (SavedData.show_ilevel and iLevel ~= nil) then 
+				local txt = iLevel
+				if (ItemHasSockets(itemLink)) then txt = txt .. "+S" end
+				table.insert(attrs, txt)
+			end
 			
 			local newItemName = itemName.." ("..table.concat(attrs, " ")..")"
 			local newLink = "|cff"..color.."|H"..itemString.."|h["..newItemName.."]|h|r"
@@ -54,17 +58,17 @@ local function CreateEmptyTooltip()
 	local leftside = {}
 	local rightside = {}
 	local L, R
-    for i = 1, 6 do
-        L, R = tip:CreateFontString(), tip:CreateFontString()
-        L:SetFontObject(GameFontNormal)
-        R:SetFontObject(GameFontNormal)
-        tip:AddFontStrings(L, R)
-        leftside[i] = L
+	for i = 1, 6 do
+		L, R = tip:CreateFontString(), tip:CreateFontString()
+		L:SetFontObject(GameFontNormal)
+		R:SetFontObject(GameFontNormal)
+		tip:AddFontStrings(L, R)
+		leftside[i] = L
 		rightside[i] = R
-    end
-    tip.leftside = leftside
+	end
+	tip.leftside = leftside
 	tip.rightside = rightside
-    return tip
+	return tip
 end
 
 -- function borrowed from PersonalLootHelper
@@ -130,6 +134,24 @@ function PLH_GetRealILVL(item)
 	else		
 		return tonumber(realILVL)
 	end
+end
+
+function ItemHasSockets(itemLink)
+	local result = false
+	local tooltip = CreateFrame("GameTooltip", "ItemLinkLevelSocketTooltip", nil, "GameTooltipTemplate")
+	tooltip:SetOwner(UIParent, 'ANCHOR_NONE')
+	tooltip:ClearLines()
+	tooltip:SetHyperlink(itemLink)
+	for i = 1, 30 do
+		local texture = _G[tooltip:GetName().."Texture"..i]
+		local textureName = texture and texture:GetTexture()
+
+		if textureName then
+			local canonicalTextureName = string.gsub(string.upper(textureName), "\\", "/")
+			result = string.find(canonicalTextureName, escapeSearchString("ITEMSOCKETINGFRAME/UI-EMPTYSOCKET-"))
+		end
+	end
+	return result
 end
 
 local function eventHandler(self, event, ...)

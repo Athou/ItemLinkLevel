@@ -1,3 +1,6 @@
+##1.6
+display if an item has sockets
+
 ## 1.5.1
 fix issue when quality is nil
 
