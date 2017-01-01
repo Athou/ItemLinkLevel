@@ -141,6 +141,12 @@ function ItemHasSockets(itemLink)
 	local tooltip = CreateFrame("GameTooltip", "ItemLinkLevelSocketTooltip", nil, "GameTooltipTemplate")
 	tooltip:SetOwner(UIParent, 'ANCHOR_NONE')
 	tooltip:ClearLines()
+	for i = 1, 30 do
+		local texture = _G[tooltip:GetName().."Texture"..i]
+		if texture then
+			texture:SetTexture(nil)
+		end
+	end
 	tooltip:SetHyperlink(itemLink)
 	for i = 1, 30 do
 		local texture = _G[tooltip:GetName().."Texture"..i]
