@@ -5,13 +5,13 @@ local frame = CreateFrame("Frame", "ItemLinkLevel");
 frame:RegisterEvent("PLAYER_LOGIN");
 local tooltip
 
-function filter(self, event, message, user, ...)
+local function filter(self, event, message, user, ...)
 	for itemLink in message:gmatch("|%x+|Hitem:.-|h.-|h|r") do
 		local itemName, _, quality, _, _, itemType, itemSubType, _, itemEquipLoc, _, _, itemClassId, itemSubClassId = GetItemInfo(itemLink)
 		if (quality ~= nil and quality >= SavedData.trigger_quality and (itemClassId == LE_ITEM_CLASS_WEAPON or itemClassId == LE_ITEM_CLASS_GEM or itemClassId == LE_ITEM_CLASS_ARMOR)) then
 			local itemString = string.match(itemLink, "item[%-?%d:]+")
 			local _, _, color = string.find(itemLink, "|?c?f?f?(%x*)|?H?([^:]*):?(%d+):?(%d*):?(%d*):?(%d*):?(%d*):?(%d*):?(%-?%d*):?(%-?%d*):?(%d*):?(%d*):?(%-?%d*)|?h?%[?([^%[%]]*)%]?|?h?|?r?")
-			local iLevel = PLH_GetRealILVL(itemLink)
+			local iLevel = ILL_PLH_GetRealILVL(itemLink)
 			
 			local attrs = {}
 			if (SavedData.show_subtype and itemSubType ~= nil) then
@@ -27,28 +27,28 @@ function filter(self, event, message, user, ...)
 					end
 				end
 				if (itemClassId == LE_ITEM_CLASS_GEM and itemSubClassId == LE_ITEM_ARMOR_RELIC) then 
-					local relicType = PLH_GetRelicType(itemLink)
+					local relicType = ILL_PLH_GetRelicType(itemLink)
 					table.insert(attrs, relicType)
 				end
 			end
 			if (SavedData.show_equiploc and itemEquipLoc ~= nil and _G[itemEquipLoc] ~= nil) then table.insert(attrs, _G[itemEquipLoc]) end
 			if (SavedData.show_ilevel and iLevel ~= nil) then 
 				local txt = iLevel
-				if (ItemHasSockets(itemLink)) then txt = txt .. "+S" end
+				if (ILL_ItemHasSockets(itemLink)) then txt = txt .. "+S" end
 				table.insert(attrs, txt)
 			end
 			
 			local newItemName = itemName.." ("..table.concat(attrs, " ")..")"
 			local newLink = "|cff"..color.."|H"..itemString.."|h["..newItemName.."]|h|r"
 			
-			message = string.gsub(message, escapeSearchString(itemLink), newLink)
+			message = string.gsub(message, ILL_escapeSearchString(itemLink), newLink)
 		end
 	end
 	return false, message, user, ...
 end
 
 -- Inhibit Regular Expression magic characters ^$()%.[]*+-?)
-function escapeSearchString(str)
+function ILL_escapeSearchString(str)
 	return str:gsub("(%W)","%%%1")
 end
 
@@ -72,7 +72,7 @@ local function CreateEmptyTooltip()
 end
 
 -- function borrowed from PersonalLootHelper
-function PLH_GetRelicType(item)
+function ILL_PLH_GetRelicType(item)
 	local relicType = nil
 	
 	if item ~= nil then
@@ -99,7 +99,7 @@ function PLH_GetRelicType(item)
 end
 
 -- function borrowed from PersonalLootHelper
-function PLH_GetRealILVL(item)
+function ILL_PLH_GetRealILVL(item)
 	local realILVL = nil
 	
 	if item ~= nil then
@@ -136,7 +136,7 @@ function PLH_GetRealILVL(item)
 	end
 end
 
-function ItemHasSockets(itemLink)
+function ILL_ItemHasSockets(itemLink)
 	local result = false
 	local tooltip = CreateFrame("GameTooltip", "ItemLinkLevelSocketTooltip", nil, "GameTooltipTemplate")
 	tooltip:SetOwner(UIParent, 'ANCHOR_NONE')
