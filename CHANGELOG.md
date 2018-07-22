@@ -1,8 +1,8 @@
-##1.7
+## 1.7
 update for BfA
 correctly namespace some functions to avoid interference with other addons
 
-##1.6
+## 1.6
 display if an item has sockets
 
 ## 1.5.1
