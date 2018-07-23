@@ -1,3 +1,4 @@
+-- constants borrowed from PersonalLootHelper
 local PLH_RELIC_TOOLTIP_TYPE_PATTERN = _G.RELIC_TOOLTIP_TYPE:gsub('%%s', '(.+)')
 local PLH_ITEM_LEVEL_PATTERN = _G.ITEM_LEVEL:gsub('%%d', '(%%d+)')
 
@@ -5,50 +6,8 @@ local frame = CreateFrame("Frame", "ItemLinkLevel");
 frame:RegisterEvent("PLAYER_LOGIN");
 local tooltip
 
-local function filter(self, event, message, user, ...)
-	for itemLink in message:gmatch("|%x+|Hitem:.-|h.-|h|r") do
-		local itemName, _, quality, _, _, itemType, itemSubType, _, itemEquipLoc, _, _, itemClassId, itemSubClassId = GetItemInfo(itemLink)
-		if (quality ~= nil and quality >= SavedData.trigger_quality and (itemClassId == LE_ITEM_CLASS_WEAPON or itemClassId == LE_ITEM_CLASS_GEM or itemClassId == LE_ITEM_CLASS_ARMOR)) then
-			local itemString = string.match(itemLink, "item[%-?%d:]+")
-			local _, _, color = string.find(itemLink, "|?c?f?f?(%x*)|?H?([^:]*):?(%d+):?(%d*):?(%d*):?(%d*):?(%d*):?(%d*):?(%-?%d*):?(%-?%d*):?(%d*):?(%d*):?(%-?%d*)|?h?%[?([^%[%]]*)%]?|?h?|?r?")
-			local iLevel = ILL_PLH_GetRealILVL(itemLink)
-			
-			local attrs = {}
-			if (SavedData.show_subtype and itemSubType ~= nil) then
-				if (itemClassId == LE_ITEM_CLASS_ARMOR and itemSubClassId == 0) then
-				-- don't display Miscellaneous for rings, necks and trinkets
-				elseif (itemClassId == LE_ITEM_CLASS_ARMOR and itemEquipLoc == "INVTYPE_CLOAK") then
-				-- don't display Cloth for cloaks
-				else
-					if (SavedData.subtype_short_format) then 
-						table.insert(attrs, itemSubType:sub(0, 1)) 
-					else 
-						table.insert(attrs, itemSubType) 
-					end
-				end
-				if (itemClassId == LE_ITEM_CLASS_GEM and itemSubClassId == LE_ITEM_ARMOR_RELIC) then 
-					local relicType = ILL_PLH_GetRelicType(itemLink)
-					table.insert(attrs, relicType)
-				end
-			end
-			if (SavedData.show_equiploc and itemEquipLoc ~= nil and _G[itemEquipLoc] ~= nil) then table.insert(attrs, _G[itemEquipLoc]) end
-			if (SavedData.show_ilevel and iLevel ~= nil) then 
-				local txt = iLevel
-				if (ILL_ItemHasSockets(itemLink)) then txt = txt .. "+S" end
-				table.insert(attrs, txt)
-			end
-			
-			local newItemName = itemName.." ("..table.concat(attrs, " ")..")"
-			local newLink = "|cff"..color.."|H"..itemString.."|h["..newItemName.."]|h|r"
-			
-			message = string.gsub(message, ILL_escapeSearchString(itemLink), newLink)
-		end
-	end
-	return false, message, user, ...
-end
-
 -- Inhibit Regular Expression magic characters ^$()%.[]*+-?)
-function ILL_escapeSearchString(str)
+local function EscapeSearchString(str)
 	return str:gsub("(%W)","%%%1")
 end
 
@@ -72,7 +31,7 @@ local function CreateEmptyTooltip()
 end
 
 -- function borrowed from PersonalLootHelper
-function ILL_PLH_GetRelicType(item)
+local function PLH_GetRelicType(item)
 	local relicType = nil
 	
 	if item ~= nil then
@@ -99,7 +58,7 @@ function ILL_PLH_GetRelicType(item)
 end
 
 -- function borrowed from PersonalLootHelper
-function ILL_PLH_GetRealILVL(item)
+local function PLH_GetRealILVL(item)
 	local realILVL = nil
 	
 	if item ~= nil then
@@ -136,7 +95,7 @@ function ILL_PLH_GetRealILVL(item)
 	end
 end
 
-function ILL_ItemHasSockets(itemLink)
+local function ItemHasSockets(itemLink)
 	local result = false
 	local tooltip = CreateFrame("GameTooltip", "ItemLinkLevelSocketTooltip", nil, "GameTooltipTemplate")
 	tooltip:SetOwner(UIParent, 'ANCHOR_NONE')
@@ -154,13 +113,55 @@ function ILL_ItemHasSockets(itemLink)
 
 		if textureName then
 			local canonicalTextureName = string.gsub(string.upper(textureName), "\\", "/")
-			result = string.find(canonicalTextureName, ILL_escapeSearchString("ITEMSOCKETINGFRAME/UI-EMPTYSOCKET-"))
+			result = string.find(canonicalTextureName, EscapeSearchString("ITEMSOCKETINGFRAME/UI-EMPTYSOCKET-"))
 		end
 	end
 	return result
 end
 
-local function eventHandler(self, event, ...)
+local function Filter(self, event, message, user, ...)
+	for itemLink in message:gmatch("|%x+|Hitem:.-|h.-|h|r") do
+		local itemName, _, quality, _, _, itemType, itemSubType, _, itemEquipLoc, _, _, itemClassId, itemSubClassId = GetItemInfo(itemLink)
+		if (quality ~= nil and quality >= SavedData.trigger_quality and (itemClassId == LE_ITEM_CLASS_WEAPON or itemClassId == LE_ITEM_CLASS_GEM or itemClassId == LE_ITEM_CLASS_ARMOR)) then
+			local itemString = string.match(itemLink, "item[%-?%d:]+")
+			local _, _, color = string.find(itemLink, "|?c?f?f?(%x*)|?H?([^:]*):?(%d+):?(%d*):?(%d*):?(%d*):?(%d*):?(%d*):?(%-?%d*):?(%-?%d*):?(%d*):?(%d*):?(%-?%d*)|?h?%[?([^%[%]]*)%]?|?h?|?r?")
+			local iLevel = PLH_GetRealILVL(itemLink)
+			
+			local attrs = {}
+			if (SavedData.show_subtype and itemSubType ~= nil) then
+				if (itemClassId == LE_ITEM_CLASS_ARMOR and itemSubClassId == 0) then
+				-- don't display Miscellaneous for rings, necks and trinkets
+				elseif (itemClassId == LE_ITEM_CLASS_ARMOR and itemEquipLoc == "INVTYPE_CLOAK") then
+				-- don't display Cloth for cloaks
+				else
+					if (SavedData.subtype_short_format) then 
+						table.insert(attrs, itemSubType:sub(0, 1)) 
+					else 
+						table.insert(attrs, itemSubType) 
+					end
+				end
+				if (itemClassId == LE_ITEM_CLASS_GEM and itemSubClassId == LE_ITEM_ARMOR_RELIC) then 
+					local relicType = PLH_GetRelicType(itemLink)
+					table.insert(attrs, relicType)
+				end
+			end
+			if (SavedData.show_equiploc and itemEquipLoc ~= nil and _G[itemEquipLoc] ~= nil) then table.insert(attrs, _G[itemEquipLoc]) end
+			if (SavedData.show_ilevel and iLevel ~= nil) then 
+				local txt = iLevel
+				if (ItemHasSockets(itemLink)) then txt = txt .. "+S" end
+				table.insert(attrs, txt)
+			end
+			
+			local newItemName = itemName.." ("..table.concat(attrs, " ")..")"
+			local newLink = "|cff"..color.."|H"..itemString.."|h["..newItemName.."]|h|r"
+			
+			message = string.gsub(message, EscapeSearchString(itemLink), newLink)
+		end
+	end
+	return false, message, user, ...
+end
+
+local function EventHandler(self, event, ...)
 	if (SavedData == nil) then SavedData = {} end
 	if (SavedData.trigger_loots == nil) then SavedData.trigger_loots = true end
 	if (SavedData.trigger_chat == nil) then SavedData.trigger_chat = true end
@@ -171,27 +172,27 @@ local function eventHandler(self, event, ...)
 	if (SavedData.show_ilevel == nil) then SavedData.show_ilevel = true end
 
 	if (SavedData.trigger_loots) then
-		ChatFrame_AddMessageEventFilter("CHAT_MSG_LOOT", filter);
+		ChatFrame_AddMessageEventFilter("CHAT_MSG_LOOT", Filter);
 	end
 
 	if (SavedData.trigger_chat) then
-		ChatFrame_AddMessageEventFilter("CHAT_MSG_BATTLEGROUND", filter);
-		ChatFrame_AddMessageEventFilter("CHAT_MSG_BATTLEGROUND_LEADER", filter);
-		ChatFrame_AddMessageEventFilter("CHAT_MSG_CHANNEL", filter);
-		ChatFrame_AddMessageEventFilter("CHAT_MSG_EMOTE", filter);
-		ChatFrame_AddMessageEventFilter("CHAT_MSG_GUILD", filter);
-		ChatFrame_AddMessageEventFilter("CHAT_MSG_INSTANCE_CHAT", filter);
-		ChatFrame_AddMessageEventFilter("CHAT_MSG_INSTANCE_CHAT_LEADER", filter);
-		ChatFrame_AddMessageEventFilter("CHAT_MSG_OFFICER", filter);
-		ChatFrame_AddMessageEventFilter("CHAT_MSG_PARTY", filter);
-		ChatFrame_AddMessageEventFilter("CHAT_MSG_PARTY_LEADER", filter);
-		ChatFrame_AddMessageEventFilter("CHAT_MSG_RAID", filter);
-		ChatFrame_AddMessageEventFilter("CHAT_MSG_RAID_LEADER", filter);
-		ChatFrame_AddMessageEventFilter("CHAT_MSG_RAID_WARNING", filter);
-		ChatFrame_AddMessageEventFilter("CHAT_MSG_SAY", filter);
-		ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER", filter);
-		ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER_INFORM", filter)
-		ChatFrame_AddMessageEventFilter("CHAT_MSG_YELL", filter);
+		ChatFrame_AddMessageEventFilter("CHAT_MSG_BATTLEGROUND", Filter);
+		ChatFrame_AddMessageEventFilter("CHAT_MSG_BATTLEGROUND_LEADER", Filter);
+		ChatFrame_AddMessageEventFilter("CHAT_MSG_CHANNEL", Filter);
+		ChatFrame_AddMessageEventFilter("CHAT_MSG_EMOTE", Filter);
+		ChatFrame_AddMessageEventFilter("CHAT_MSG_GUILD", Filter);
+		ChatFrame_AddMessageEventFilter("CHAT_MSG_INSTANCE_CHAT", Filter);
+		ChatFrame_AddMessageEventFilter("CHAT_MSG_INSTANCE_CHAT_LEADER", Filter);
+		ChatFrame_AddMessageEventFilter("CHAT_MSG_OFFICER", Filter);
+		ChatFrame_AddMessageEventFilter("CHAT_MSG_PARTY", Filter);
+		ChatFrame_AddMessageEventFilter("CHAT_MSG_PARTY_LEADER", Filter);
+		ChatFrame_AddMessageEventFilter("CHAT_MSG_RAID", Filter);
+		ChatFrame_AddMessageEventFilter("CHAT_MSG_RAID_LEADER", Filter);
+		ChatFrame_AddMessageEventFilter("CHAT_MSG_RAID_WARNING", Filter);
+		ChatFrame_AddMessageEventFilter("CHAT_MSG_SAY", Filter);
+		ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER", Filter);
+		ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER_INFORM", Filter)
+		ChatFrame_AddMessageEventFilter("CHAT_MSG_YELL", Filter);
 	end
 		
 	local panel = CreateFrame("Frame", "OptionsPanel", UIParent)
@@ -255,5 +256,5 @@ local function eventHandler(self, event, ...)
 
 	InterfaceOptions_AddCategory(panel)
 end
-frame:SetScript("OnEvent", eventHandler);
+frame:SetScript("OnEvent", EventHandler);
 
