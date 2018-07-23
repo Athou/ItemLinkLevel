@@ -154,7 +154,7 @@ function ILL_ItemHasSockets(itemLink)
 
 		if textureName then
 			local canonicalTextureName = string.gsub(string.upper(textureName), "\\", "/")
-			result = string.find(canonicalTextureName, escapeSearchString("ITEMSOCKETINGFRAME/UI-EMPTYSOCKET-"))
+			result = string.find(canonicalTextureName, ILL_escapeSearchString("ITEMSOCKETINGFRAME/UI-EMPTYSOCKET-"))
 		end
 	end
 	return result

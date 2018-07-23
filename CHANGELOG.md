@@ -1,3 +1,6 @@
+## 1.7.1
+fix incorrect function name
+
 ## 1.7
 update for BfA
 correctly namespace some functions to avoid interference with other addons

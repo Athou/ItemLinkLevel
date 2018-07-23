@@ -1,5 +1,5 @@
 ## Interface: 80000
 ## Title: ItemLinkLevel
-## Version: 1.7
+## Version: 1.7.1
 ## SavedVariables: SavedData
 main.lua
