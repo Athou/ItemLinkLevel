@@ -1,3 +1,6 @@
+## 1.8
+prevent memory leaks by reusing tooltips
+
 ## 1.7.1
 fix incorrect function name
 
