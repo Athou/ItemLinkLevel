@@ -5,6 +5,7 @@ local PLH_ITEM_LEVEL_PATTERN = _G.ITEM_LEVEL:gsub('%%d', '(%%d+)')
 local frame = CreateFrame("Frame", "ItemLinkLevel");
 frame:RegisterEvent("PLAYER_LOGIN");
 local tooltip
+local socketTooltip
 
 -- Inhibit Regular Expression magic characters ^$()%.[]*+-?)
 local function EscapeSearchString(str)
@@ -97,18 +98,18 @@ end
 
 local function ItemHasSockets(itemLink)
 	local result = false
-	local tooltip = CreateFrame("GameTooltip", "ItemLinkLevelSocketTooltip", nil, "GameTooltipTemplate")
-	tooltip:SetOwner(UIParent, 'ANCHOR_NONE')
-	tooltip:ClearLines()
+	socketTooltip = socketTooltip or CreateFrame("GameTooltip", "ItemLinkLevelSocketTooltip", nil, "GameTooltipTemplate")
+	socketTooltip:SetOwner(UIParent, 'ANCHOR_NONE')
+	socketTooltip:ClearLines()
 	for i = 1, 30 do
-		local texture = _G[tooltip:GetName().."Texture"..i]
+		local texture = _G[socketTooltip:GetName().."Texture"..i]
 		if texture then
 			texture:SetTexture(nil)
 		end
 	end
-	tooltip:SetHyperlink(itemLink)
+	socketTooltip:SetHyperlink(itemLink)
 	for i = 1, 30 do
-		local texture = _G[tooltip:GetName().."Texture"..i]
+		local texture = _G[socketTooltip:GetName().."Texture"..i]
 		local textureName = texture and texture:GetTexture()
 
 		if textureName then
