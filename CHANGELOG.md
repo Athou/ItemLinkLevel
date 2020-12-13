@@ -1,3 +1,6 @@
+## 2.0
+toc update for shadowlands
+
 ## 1.8
 prevent memory leaks by reusing tooltips
 
