@@ -1,5 +1,5 @@
-## Interface: 90002
+## Interface: 10000
 ## Title: ItemLinkLevel
-## Version: 2.0
+## Version: 2.1
 ## SavedVariables: SavedData
 main.lua
