@@ -2,10 +2,18 @@
 local PLH_RELIC_TOOLTIP_TYPE_PATTERN = _G.RELIC_TOOLTIP_TYPE:gsub('%%s', '(.+)')
 local PLH_ITEM_LEVEL_PATTERN = _G.ITEM_LEVEL:gsub('%%d', '(%%d+)')
 
+local SOCKET_STATS = {
+	'EMPTY_SOCKET_RED',
+	'EMPTY_SOCKET_YELLOW',
+	'EMPTY_SOCKET_BLUE',
+	'EMPTY_SOCKET_META',
+	'EMPTY_SOCKET_PRISMATIC',
+	'EMPTY_SOCKET_DOMINATION',
+}
+
 local frame = CreateFrame("Frame", "ItemLinkLevel");
 frame:RegisterEvent("PLAYER_LOGIN");
 local tooltip
-local socketTooltip
 
 -- Inhibit Regular Expression magic characters ^$()%.[]*+-?)
 local function EscapeSearchString(str)
@@ -96,27 +104,15 @@ local function PLH_GetRealILVL(item)
 end
 
 local function ItemHasSockets(itemLink)
-	local result = false
-	socketTooltip = socketTooltip or CreateFrame("GameTooltip", "ItemLinkLevelSocketTooltip", nil, "GameTooltipTemplate")
-	socketTooltip:SetOwner(UIParent, 'ANCHOR_NONE')
-	socketTooltip:ClearLines()
-	for i = 1, 30 do
-		local texture = _G[socketTooltip:GetName() .. "Texture" .. i]
-		if texture then
-			texture:SetTexture(nil)
-		end
-	end
-	socketTooltip:SetHyperlink(itemLink)
-	for i = 1, 30 do
-		local texture = _G[socketTooltip:GetName() .. "Texture" .. i]
-		local textureName = texture and texture:GetTexture()
+	local itemStats = GetItemStats(itemLink)
+	if itemStats == nil then return false end
 
-		if textureName then
-			local canonicalTextureName = string.gsub(string.upper(textureName), "\\", "/")
-			result = string.find(canonicalTextureName, EscapeSearchString("ITEMSOCKETINGFRAME/UI-EMPTYSOCKET-"))
-		end
+	local socketCount = 0
+	for _, socketStat in pairs(SOCKET_STATS) do
+		socketCount = socketCount + (itemStats[socketStat] or 0)
 	end
-	return result
+
+	return socketCount > 0
 end
 
 local function Filter(self, event, message, user, ...)
