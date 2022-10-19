@@ -1,6 +1,7 @@
 ## 2.1
 
 add support for dragonflight
+add support for wotlk
 
 ## 2.0
 
