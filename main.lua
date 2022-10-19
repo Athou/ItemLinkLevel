@@ -154,6 +154,11 @@ local function Filter(self, event, message, user, ...)
 
 			local newItemName = itemName .. " (" .. table.concat(attrs, " ") .. ")"
 			local newLink = color .. "|H" .. itemString .. "|h[" .. newItemName .. "]|h|r"
+			if (SavedData.show_icon) then
+				local itemId = select(2, string.split(":", itemString))
+				local itemTexture = GetItemIcon(itemId)
+				newLink = "|T" .. itemTexture .. ":0|t" .. newLink
+			end
 
 			message = string.gsub(message, EscapeSearchString(itemLink), newLink)
 		end
@@ -170,6 +175,7 @@ local function EventHandler(self, event, ...)
 	if (SavedData.subtype_short_format == nil) then SavedData.subtype_short_format = false end
 	if (SavedData.show_equiploc == nil) then SavedData.show_equiploc = true end
 	if (SavedData.show_ilevel == nil) then SavedData.show_ilevel = true end
+	if (SavedData.show_icon == nil) then SavedData.show_icon = true end
 
 	if (SavedData.trigger_loots) then
 		ChatFrame_AddMessageEventFilter("CHAT_MSG_LOOT", Filter);
@@ -221,6 +227,12 @@ local function EventHandler(self, event, ...)
 	iLevelCheckbox:SetChecked(SavedData.show_ilevel)
 	_G[iLevelCheckbox:GetName() .. "Text"]:SetText("Display item level")
 	iLevelCheckbox:SetScript("OnClick", function(self) SavedData.show_ilevel = self:GetChecked() end)
+
+	local itemIconCheckbox = CreateFrame("CheckButton", "itemIconCheckbox", panel, "UICheckButtonTemplate")
+	itemIconCheckbox:SetPoint("TOPLEFT", 10, -150)
+	itemIconCheckbox:SetChecked(SavedData.show_icon)
+	_G[itemIconCheckbox:GetName() .. "Text"]:SetText("Display item icon")
+	itemIconCheckbox:SetScript("OnClick", function(self) SavedData.show_icon = self:GetChecked() end)
 
 	local triggerLootsCheckbox = CreateFrame("CheckButton", "triggerLootsCheckbox", panel, "UICheckButtonTemplate")
 	triggerLootsCheckbox:SetPoint("TOPLEFT", 10, -180)
