@@ -14,7 +14,7 @@ end
 
 -- function borrowed from PersonalLootHelper
 local function CreateEmptyTooltip()
-    local tip = CreateFrame('GameTooltip')
+	local tip = CreateFrame('GameTooltip', "ItemLinkLevelTooltip", nil, "GameTooltipTemplate")
 	local leftside = {}
 	local rightside = {}
 	local L, R
@@ -28,6 +28,7 @@ local function CreateEmptyTooltip()
 	end
 	tip.leftside = leftside
 	tip.rightside = rightside
+	tip:SetOwner(UIParent, 'ANCHOR_NONE')
 	return tip
 end
 
@@ -37,7 +38,6 @@ local function PLH_GetRelicType(item)
 	
 	if item ~= nil then
 		tooltip = tooltip or CreateEmptyTooltip()
-		tooltip:SetOwner(UIParent, 'ANCHOR_NONE')
 		tooltip:ClearLines()
 		tooltip:SetHyperlink(item)
 		local t = tooltip.leftside[2]:GetText()
@@ -64,7 +64,6 @@ local function PLH_GetRealILVL(item)
 	
 	if item ~= nil then
 		tooltip = tooltip or CreateEmptyTooltip()
-		tooltip:SetOwner(UIParent, 'ANCHOR_NONE')
 		tooltip:ClearLines()
 		tooltip:SetHyperlink(item)
 		local t = tooltip.leftside[2]:GetText()
@@ -122,17 +121,17 @@ end
 
 local function Filter(self, event, message, user, ...)
 	for itemLink in message:gmatch("|%x+|Hitem:.-|h.-|h|r") do
-		local itemName, _, quality, _, _, itemType, itemSubType, _, itemEquipLoc, _, _, itemClassId, itemSubClassId = GetItemInfo(itemLink)
-		if (quality ~= nil and quality >= SavedData.trigger_quality and (itemClassId == LE_ITEM_CLASS_WEAPON or itemClassId == LE_ITEM_CLASS_GEM or itemClassId == LE_ITEM_CLASS_ARMOR)) then
+		local itemName, _, quality, _, _, _, itemSubType, _, itemEquipLoc, _, _, itemClassId, itemSubClassId = GetItemInfo(itemLink)
+		if (quality ~= nil and quality >= SavedData.trigger_quality and (itemClassId == Enum.ItemClass.Weapon or itemClassId == Enum.ItemClass.Gem or itemClassId == Enum.ItemClass.Armor)) then
 			local itemString = string.match(itemLink, "item[%-?%d:]+")
-			local _, _, color = string.find(itemLink, "|?c?f?f?(%x*)|?H?([^:]*):?(%d+):?(%d*):?(%d*):?(%d*):?(%d*):?(%d*):?(%-?%d*):?(%-?%d*):?(%d*):?(%d*):?(%-?%d*)|?h?%[?([^%[%]]*)%]?|?h?|?r?")
+			local color = ITEM_QUALITY_COLORS[quality].hex
 			local iLevel = PLH_GetRealILVL(itemLink)
-			
+					
 			local attrs = {}
 			if (SavedData.show_subtype and itemSubType ~= nil) then
-				if (itemClassId == LE_ITEM_CLASS_ARMOR and itemSubClassId == 0) then
+				if (itemClassId == Enum.ItemClass.Armor and itemSubClassId == 0) then
 				-- don't display Miscellaneous for rings, necks and trinkets
-				elseif (itemClassId == LE_ITEM_CLASS_ARMOR and itemEquipLoc == "INVTYPE_CLOAK") then
+				elseif (itemClassId == Enum.ItemClass.Armor and itemEquipLoc == "INVTYPE_CLOAK") then
 				-- don't display Cloth for cloaks
 				else
 					if (SavedData.subtype_short_format) then 
@@ -141,7 +140,7 @@ local function Filter(self, event, message, user, ...)
 						table.insert(attrs, itemSubType) 
 					end
 				end
-				if (itemClassId == LE_ITEM_CLASS_GEM and itemSubClassId == LE_ITEM_ARMOR_RELIC) then 
+				if (itemClassId == Enum.ItemClass.Gem and itemSubClassId == Enum.ItemArmorSubclass.Relic) then
 					local relicType = PLH_GetRelicType(itemLink)
 					table.insert(attrs, relicType)
 				end
@@ -154,7 +153,7 @@ local function Filter(self, event, message, user, ...)
 			end
 			
 			local newItemName = itemName.." ("..table.concat(attrs, " ")..")"
-			local newLink = "|cff"..color.."|H"..itemString.."|h["..newItemName.."]|h|r"
+			local newLink = color.."|H"..itemString.."|h["..newItemName.."]|h|r"
 			
 			message = string.gsub(message, EscapeSearchString(itemLink), newLink)
 		end
@@ -235,18 +234,18 @@ local function EventHandler(self, event, ...)
 	_G[triggerChatCheckbox:GetName().."Text"]:SetText("Trigger on chat messages (requires restart)")
 	triggerChatCheckbox:SetScript("OnClick", function(self) SavedData.trigger_chat = self:GetChecked() end)
 	
-	local triggerQualityLabel = panel:CreateFontString("triggerQualityLabel", panel, "GameFontNormal")
+	local triggerQualityLabel = panel:CreateFontString("triggerQualityLabel", nil, "GameTooltipText")
 	triggerQualityLabel:SetText("Minimum trigger quality")
 	triggerQualityLabel:SetPoint("TOPLEFT",10,-260)
-	local triggerQualityValue = panel:CreateFontString("triggerQualityValue", panel, "GameFontNormal")
-	local triggerQualitySlider = CreateFrame("Slider", "MySliderGlobalName", panel, "OptionsSliderTemplate")
+	local triggerQualityValue = panel:CreateFontString("triggerQualityValue", nil, "GameTooltipText")
+	local triggerQualitySlider = CreateFrame("Slider", "iLevelTriggerQualityValue", panel, "OptionsSliderTemplate")
 	triggerQualitySlider:SetPoint("LEFT", triggerQualityLabel, "RIGHT", 10, 0)
 	triggerQualitySlider:SetMinMaxValues(0, 6)
 	triggerQualitySlider:SetValue(SavedData.trigger_quality)
 	triggerQualitySlider:SetValueStep(1)
 	getglobal(triggerQualitySlider:GetName() .. 'Low'):SetText(_G["ITEM_QUALITY0_DESC"])
 	getglobal(triggerQualitySlider:GetName() .. 'High'):SetText(_G["ITEM_QUALITY6_DESC"])
-	triggerQualitySlider:SetScript("OnValueChanged", function(self, value) 
+	triggerQualitySlider:SetScript("OnValueChanged", function(_, value) 
 		value = math.floor(value)
 		SavedData.trigger_quality = value 
 	    triggerQualityValue:SetText(_G["ITEM_QUALITY"..value.."_DESC"])
@@ -258,4 +257,3 @@ local function EventHandler(self, event, ...)
 	InterfaceOptions_AddCategory(panel)
 end
 frame:SetScript("OnEvent", EventHandler);
-
