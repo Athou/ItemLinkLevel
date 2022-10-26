@@ -20,23 +20,27 @@ local function EscapeSearchString(str)
 	return str:gsub("(%W)", "%%%1")
 end
 
--- function borrowed from PersonalLootHelper
+-- function adapted from PersonalLootHelper
 local function CreateEmptyTooltip()
 	local tip = CreateFrame('GameTooltip', "ItemLinkLevelTooltip", nil, "GameTooltipTemplate")
+	tip:SetOwner(UIParent, 'ANCHOR_NONE')
+
 	local leftside = {}
 	local rightside = {}
-	local L, R
 	for i = 1, 6 do
-		L, R = tip:CreateFontString(), tip:CreateFontString()
-		L:SetFontObject(GameFontNormal)
-		R:SetFontObject(GameFontNormal)
-		tip:AddFontStrings(L, R)
-		leftside[i] = L
-		rightside[i] = R
+		local leftLine = tip:CreateFontString("ItemLinkLevelTooltipTextLeft" .. i, nil, "GameTooltipText")
+		leftLine:SetFontObject("GameFontNormal")
+
+		local rightLine = tip:CreateFontString("ItemLinkLevelTooltipTextRight" .. i, nil, "GameTooltipText")
+		rightLine:SetFontObject("GameFontNormal")
+
+		tip:AddFontStrings(leftLine, rightLine)
+
+		leftside[i] = leftLine
+		rightside[i] = rightLine
 	end
 	tip.leftside = leftside
 	tip.rightside = rightside
-	tip:SetOwner(UIParent, 'ANCHOR_NONE')
 	return tip
 end
 

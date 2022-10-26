@@ -1,3 +1,7 @@
+## 2.2
+
+- fix "Couldn't find region named 'ItemLinkLevelTooltipTextLeft6'"
+
 ## 2.1
 
 - add support for dragonflight
