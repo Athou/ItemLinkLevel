@@ -27,7 +27,7 @@ local function CreateEmptyTooltip()
 
 	local leftside = {}
 	local rightside = {}
-	for i = 1, 12 do
+	for i = 1, 99 do
 		local leftLine = tip:CreateFontString("ItemLinkLevelTooltipTextLeft" .. i, nil, "GameTooltipText")
 		leftLine:SetFontObject("GameFontNormal")
 
