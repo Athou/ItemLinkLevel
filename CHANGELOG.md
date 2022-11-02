@@ -1,3 +1,7 @@
+## 2.2.1
+
+- fix "Couldn't find region named 'ItemLinkLevelTooltipTextLeft14'"
+
 ## 2.2
 
 - fix "Couldn't find region named 'ItemLinkLevelTooltipTextLeft6'"
