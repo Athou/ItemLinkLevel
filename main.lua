@@ -127,9 +127,10 @@ end
 
 local function Filter(self, event, message, user, ...)
 	for itemLink in message:gmatch("|%x+|Hitem:.-|h.-|h|r") do
-		local itemName, _, quality, _, _, _, itemSubType, _, itemEquipLoc, _, _, itemClassId, itemSubClassId = GetItemInfo(itemLink)
+		local itemName, _, quality, _, _, _, itemSubType, _, itemEquipLoc, _, _, itemClassId, itemSubClassId =
+			GetItemInfo(itemLink)
 		if (
-			quality ~= nil and quality >= SavedData.trigger_quality and
+				quality ~= nil and quality >= SavedData.trigger_quality and
 				(itemClassId == Enum.ItemClass.Weapon or itemClassId == Enum.ItemClass.Gem or itemClassId == Enum.ItemClass.Armor)) then
 			local itemString = string.match(itemLink, "item[%-?%d:]+")
 			local color = ITEM_QUALITY_COLORS[quality].hex
@@ -276,7 +277,12 @@ local function EventHandler(self, event, ...)
 	triggerQualityValue:SetText(_G["ITEM_QUALITY" .. SavedData.trigger_quality .. "_DESC"])
 	triggerQualityValue:SetPoint("LEFT", triggerQualitySlider, "RIGHT", 10, 0)
 
-	InterfaceOptions_AddCategory(panel)
+	if InterfaceOptions_AddCategory then
+		InterfaceOptions_AddCategory(panel)
+	else
+		local category, layout = _G.Settings.RegisterCanvasLayoutCategory(panel, panel.name)
+		_G.Settings.RegisterAddOnCategory(category)
+	end
 end
 
 frame:SetScript("OnEvent", EventHandler);

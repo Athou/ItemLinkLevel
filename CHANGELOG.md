@@ -1,3 +1,7 @@
+## 3.0.0
+
+- add support for TWW
+
 ## 2.2.1
 
 - fix "Couldn't find region named 'ItemLinkLevelTooltipTextLeft14'"
