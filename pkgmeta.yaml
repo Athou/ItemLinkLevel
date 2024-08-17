@@ -1,0 +1,4 @@
+package-as: ItemLinkLevel
+
+ignore:
+- CHANGELOG.md
