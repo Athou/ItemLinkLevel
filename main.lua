@@ -3,18 +3,12 @@ local PLH_RELIC_TOOLTIP_TYPE_PATTERN = _G.RELIC_TOOLTIP_TYPE:gsub('%%s', '(.+)')
 local PLH_ITEM_LEVEL_PATTERN = _G.ITEM_LEVEL:gsub('%%d', '(%%d+)')
 
 local SOCKET_STATS = {
+	'EMPTY_SOCKET_RED',
+	'EMPTY_SOCKET_YELLOW',
 	'EMPTY_SOCKET_BLUE',
-	'EMPTY_SOCKET_COGWHEEL',
-	'EMPTY_SOCKET_CYPHER',
-	'EMPTY_SOCKET_DOMINATION',
-	'EMPTY_SOCKET_HYDRAULIC',
 	'EMPTY_SOCKET_META',
 	'EMPTY_SOCKET_PRISMATIC',
-	'EMPTY_SOCKET_PUNCHCARDBLUE',
-	'EMPTY_SOCKET_PUNCHCARDRED',
-	'EMPTY_SOCKET_PUNCHCARDYELLOW',
-	'EMPTY_SOCKET_RED',
-	'EMPTY_SOCKET_YELLOW'
+	'EMPTY_SOCKET_DOMINATION',
 }
 
 local frame = CreateFrame("Frame", "ItemLinkLevel");
@@ -102,7 +96,7 @@ local function PLH_GetRealILVL(item)
 		-- if realILVL is still nil, we couldn't find it in the tooltip - try grabbing it from getItemInfo, even though
 		--   that doesn't return upgrade levels
 		if realILVL == nil then
-			_, _, _, realILVL, _, _, _, _, _, _, _ = GetItemInfo(item)
+			_, _, _, realILVL, _, _, _, _, _, _, _ = C_Item.GetItemInfo(item)
 		end
 	end
 
@@ -114,7 +108,7 @@ local function PLH_GetRealILVL(item)
 end
 
 local function ItemHasSockets(itemLink)
-	local itemStats = GetItemStats(itemLink)
+	local itemStats = C_Item.GetItemStats(itemLink)
 	if itemStats == nil then return false end
 
 	local socketCount = 0
@@ -127,10 +121,9 @@ end
 
 local function Filter(self, event, message, user, ...)
 	for itemLink in message:gmatch("|%x+|Hitem:.-|h.-|h|r") do
-		local itemName, _, quality, _, _, _, itemSubType, _, itemEquipLoc, _, _, itemClassId, itemSubClassId =
-			GetItemInfo(itemLink)
+		local itemName, _, quality, _, _, _, itemSubType, _, itemEquipLoc, _, _, itemClassId, itemSubClassId = C_Item.GetItemInfo(itemLink)
 		if (
-				quality ~= nil and quality >= SavedData.trigger_quality and
+			quality ~= nil and quality >= SavedData.trigger_quality and
 				(itemClassId == Enum.ItemClass.Weapon or itemClassId == Enum.ItemClass.Gem or itemClassId == Enum.ItemClass.Armor)) then
 			local itemString = string.match(itemLink, "item[%-?%d:]+")
 			local color = ITEM_QUALITY_COLORS[quality].hex
@@ -167,7 +160,7 @@ local function Filter(self, event, message, user, ...)
 			local newLink = color .. "|H" .. itemString .. "|h[" .. newItemName .. "]|h|r"
 			if (SavedData.show_icon) then
 				local itemId = select(2, string.split(":", itemString))
-				local itemTexture = GetItemIcon(itemId)
+				local itemTexture = C_Item.GetItemIcon(itemId)
 				newLink = "|T" .. itemTexture .. ":0|t" .. newLink
 			end
 
