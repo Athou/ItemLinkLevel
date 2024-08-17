@@ -160,7 +160,7 @@ local function Filter(self, event, message, user, ...)
 			local newLink = color .. "|H" .. itemString .. "|h[" .. newItemName .. "]|h|r"
 			if (SavedData.show_icon) then
 				local itemId = select(2, string.split(":", itemString))
-				local itemTexture = C_Item.GetItemIcon(itemId)
+				local itemTexture = C_Item.GetItemIconByID(itemId)
 				newLink = "|T" .. itemTexture .. ":0|t" .. newLink
 			end
 
