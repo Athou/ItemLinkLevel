@@ -1,5 +1,0 @@
-## Interface: 30403
-## Title: ItemLinkLevel
-## Version: 3.0.0
-## SavedVariables: SavedData
-main.lua

@@ -1,3 +1,7 @@
+## 3.0.1
+
+- Fixes for 11.0.2
+
 ## 3.0.0
 
 - add support for TWW
